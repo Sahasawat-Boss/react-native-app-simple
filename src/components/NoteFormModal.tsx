@@ -5,13 +5,15 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
+  TextInputProps,
   View,
 } from 'react-native';
 import { Note } from '../types/note';
+import { useTheme } from '../theme/ThemeProvider';
 
 type Props = {
   visible: boolean;
@@ -33,47 +35,98 @@ function NoteForm({ editingNote, onClose, onSubmit }: Omit<Props, 'visible'>) {
   // เติมค่าจาก editingNote (โหมดแก้ไข) หรือว่าง (โหมดเพิ่มใหม่) ตอน mount
   const [title, setTitle] = useState(editingNote?.title ?? '');
   const [content, setContent] = useState(editingNote?.content ?? '');
+  const { colors } = useTheme();
+  const canSave = title.trim().length > 0;
 
   const handleSubmit = () => {
-    if (!title.trim()) return;
+    if (!canSave) return;
     onSubmit(title, content);
     onClose();
   };
 
   return (
     <View style={styles.overlay}>
+      {/* กดพื้นที่มืดด้านบนเพื่อปิด */}
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="ปิด" />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.sheet}
+        style={[styles.sheet, { backgroundColor: colors.card }]}
       >
-        <Text style={styles.heading}>
+        <View style={[styles.handle, { backgroundColor: colors.border }]} />
+
+        <Text style={[styles.heading, { color: colors.text }]}>
           {editingNote ? 'แก้ไขรายการ' : 'เพิ่มรายการใหม่'}
         </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="หัวข้อ"
+        <FormInput
+          label="หัวข้อ"
+          placeholder="เช่น อ่านบทเรียน Navigation"
           value={title}
           onChangeText={setTitle}
           autoFocus
         />
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="รายละเอียด (ไม่บังคับ)"
+        <FormInput
+          label="รายละเอียด"
+          placeholder="ไม่บังคับ"
           value={content}
           onChangeText={setContent}
           multiline
+          style={styles.textArea}
         />
 
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelText}>ยกเลิก</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
-            <Text style={styles.saveText}>บันทึก</Text>
-          </TouchableOpacity>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              { backgroundColor: colors.background },
+              pressed && styles.pressed,
+            ]}
+            onPress={onClose}
+          >
+            <Text style={[styles.buttonText, { color: colors.textSecondary }]}>ยกเลิก</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              { backgroundColor: colors.primary },
+              !canSave && styles.disabled,
+              pressed && canSave && styles.pressed,
+            ]}
+            onPress={handleSubmit}
+            disabled={!canSave}
+          >
+            <Text style={[styles.buttonText, { color: '#fff' }]}>บันทึก</Text>
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
+    </View>
+  );
+}
+
+// ช่องกรอกพร้อม label และเส้นขอบสีหลักตอนกำลังพิมพ์ (focus)
+function FormInput({ label, style, ...inputProps }: TextInputProps & { label: string }) {
+  const { colors } = useTheme();
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <View style={styles.field}>
+      <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+      <TextInput
+        {...inputProps}
+        placeholderTextColor={colors.textMuted}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={[
+          styles.input,
+          {
+            backgroundColor: colors.background,
+            color: colors.text,
+            borderColor: focused ? colors.primary : 'transparent',
+          },
+          style,
+        ]}
+      />
     </View>
   );
 }
@@ -81,57 +134,67 @@ function NoteForm({ editingNote, onClose, onSubmit }: Omit<Props, 'visible'>) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(2,6,23,0.5)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 32,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 36,
+  },
+  handle: {
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginBottom: 18,
   },
   heading: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 16,
-    color: '#111827',
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 18,
+  },
+  field: {
+    marginBottom: 14,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 6,
+    marginLeft: 2,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 10,
-    padding: 12,
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 15,
-    marginBottom: 12,
   },
   textArea: {
-    minHeight: 80,
+    minHeight: 96,
     textAlignVertical: 'top',
   },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
+    gap: 12,
     marginTop: 8,
   },
-  cancelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  button: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
   },
-  cancelText: {
-    color: '#6b7280',
-    fontWeight: '600',
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
   },
-  saveButton: {
-    backgroundColor: '#4f46e5',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+  pressed: {
+    opacity: 0.8,
   },
-  saveText: {
-    color: '#fff',
-    fontWeight: '600',
+  disabled: {
+    opacity: 0.4,
   },
 });

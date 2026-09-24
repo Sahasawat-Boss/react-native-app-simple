@@ -1,91 +1,167 @@
 // หน้าแรก (route "/") — เมนูหลักให้เลือกเข้าแต่ละฟีเจอร์
 // เพิ่มเมนูใหม่ได้โดยเพิ่ม object ใน MENU_ITEMS + สร้างไฟล์ route ที่ตรงกับ href ใน src/app/
-import { Link } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+// หน้านี้ซ่อน header ของ Stack (ตั้งใน _layout.tsx) แล้วทำหัวหน้าเอง จึงต้องเว้นขอบบนตาม safe area เอง
+import { Href, router } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { IconBadge } from '@/components/IconBadge';
+import { useCardStyle } from '@/components/Card';
+import { useTheme } from '@/theme/ThemeProvider';
 
 type MenuItem = {
-  href: '/notes';
+  href: Href;
   title: string;
   description: string;
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
 };
 
+// ตั้งค่าย้ายไปเป็นปุ่มเฟืองมุมขวาบนแทน
 const MENU_ITEMS: MenuItem[] = [
   {
     href: '/notes',
     title: 'บันทึก',
     description: 'จดโน้ตและรายการที่ต้องทำ',
-    icon: 'document-text-outline',
-    color: '#4f46e5',
+    icon: 'document-text',
+    color: '#5b5bd6',
+  },
+  {
+    href: '/lessons',
+    title: 'บทเรียน',
+    description: 'สรุปพื้นฐาน React Native',
+    icon: 'school',
+    color: '#12a594',
   },
 ];
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const cardStyle = useCardStyle();
+
+  const today = new Date().toLocaleDateString('th-TH', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
   return (
-    <FlatList
-      data={MENU_ITEMS}
-      keyExtractor={(item) => item.href}
-      contentContainerStyle={styles.listContent}
-      renderItem={({ item }) => (
-        // asChild: ให้ Link ส่ง onPress ไปที่ Pressable ข้างใน (คล้าย <Link legacyBehavior> ของ Next.js)
-        <Link href={item.href} asChild>
-          <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
-            <View style={[styles.iconWrap, { backgroundColor: item.color }]}>
-              <Ionicons name={item.icon} size={24} color="#fff" />
+    <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}>
+      <View style={styles.header}>
+        <View style={styles.headerText}>
+          <Text style={[styles.date, { color: colors.textSecondary }]}>{today}</Text>
+          <Text style={[styles.greeting, { color: colors.text }]}>สวัสดี 👋</Text>
+          <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
+            วันนี้อยากทำอะไรดี?
+          </Text>
+        </View>
+        {/* ใช้ router.push แทน <Link asChild> เพราะ Link asChild ทำ style แบบ function ของ Pressable หาย */}
+        <Pressable
+          onPress={() => router.push('/settings')}
+          style={({ pressed }) => [cardStyle, styles.settingsButton, pressed && styles.pressed]}
+          accessibilityRole="link"
+          accessibilityLabel="ตั้งค่า"
+        >
+          <Ionicons name="settings-outline" size={22} color={colors.text} />
+        </Pressable>
+      </View>
+
+      <View style={styles.grid}>
+        {MENU_ITEMS.map((item) => (
+          <Pressable
+            key={String(item.href)}
+            onPress={() => router.push(item.href)}
+            accessibilityRole="link"
+            style={({ pressed }) => [cardStyle, styles.tile, pressed && styles.pressed]}
+          >
+            <IconBadge icon={item.icon} color={item.color} size={52} />
+            <View style={styles.tileText}>
+              <Text style={[styles.tileTitle, { color: colors.text }]}>{item.title}</Text>
+              <Text style={[styles.tileDescription, { color: colors.textSecondary }]}>
+                {item.description}
+              </Text>
             </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.description}>{item.description}</Text>
+            <View style={[styles.tileArrow, { backgroundColor: item.color }]}>
+              <Ionicons name="arrow-forward" size={16} color="#fff" />
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
           </Pressable>
-        </Link>
-      )}
-    />
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  listContent: {
-    padding: 20,
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  card: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    gap: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    alignItems: 'flex-start',
+    marginBottom: 28,
   },
-  cardPressed: {
-    opacity: 0.7,
+  headerText: {
+    flex: 1,
   },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+  date: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  greeting: {
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  subGreeting: {
+    fontSize: 16,
+    marginTop: 4,
+  },
+  settingsButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  textContainer: {
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+  },
+  tile: {
+    // 2 คอลัมน์: กว้างเกือบครึ่ง (หัก gap แล้ว) flexGrow ให้ยืดเต็มถ้าเหลือตัวเดียวในแถว
+    flexBasis: '46%',
+    flexGrow: 1,
+    padding: 18,
+    minHeight: 190,
+  },
+  tileText: {
+    marginTop: 16,
     flex: 1,
   },
-  title: {
-    fontSize: 17,
+  tileTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
   },
-  description: {
+  tileDescription: {
     fontSize: 13,
-    color: '#6b7280',
-    marginTop: 2,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  tileArrow: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    marginTop: 12,
+  },
+  pressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.97 }],
   },
 });
