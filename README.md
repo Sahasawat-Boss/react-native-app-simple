@@ -6,6 +6,7 @@
 
 - **บทเรียน** — หลักสูตร React Native แบ่งเป็นโมดูล กดเข้าไปอ่านแต่ละบทและติ๊กว่าเรียนจบแล้วได้ (จำความคืบหน้าไว้ในเครื่อง)
 - **บันทึก** — จดโน้ต / to-do เพิ่ม แก้ไข ลบ และติ๊กว่าเสร็จแล้วได้ (เก็บใน AsyncStorage)
+- **แชท** — หน้าตาแบบแอปแชท: รายชื่อแชท, เพื่อนที่ออนไลน์, ฟองข้อความ, "กำลังพิมพ์..." และเพื่อนสมมติตอบกลับอัตโนมัติ (ข้อความเก็บในเครื่อง)
 - **ตั้งค่า** — สลับโหมดมืด/สว่าง (ค่าเริ่มต้นตามระบบของเครื่อง)
 
 ## เริ่มต้นใช้งาน
@@ -39,11 +40,14 @@ src/
 │   ├── lessons/
 │   │   ├── index.tsx     # "/lessons"   รายการบทเรียนตามโมดูล
 │   │   └── [id].tsx      # "/lessons/:id" เนื้อหาแต่ละบท
+│   ├── chats/
+│   │   ├── index.tsx     # "/chats"     รายชื่อแชท
+│   │   └── [id].tsx      # "/chats/:id" ห้องแชท
 │   ├── notes.tsx         # "/notes"     บันทึก
 │   └── settings.tsx      # "/settings"  ตั้งค่า
-├── components/           # UI ที่ใช้ซ้ำ (Card, IconBadge, NoteItem, ...)
-├── data/lessons.ts       # เนื้อหาหลักสูตร
-├── hooks/                # useNotes, useLessonProgress
+├── components/           # UI ที่ใช้ซ้ำ (Card, IconBadge, Avatar, NoteItem, ...)
+├── data/                 # เนื้อหาหลักสูตร + ข้อมูลเพื่อนสมมติของแชท
+├── hooks/                # useNotes, useLessonProgress, useChats
 ├── storage/              # อ่าน/เขียน AsyncStorage
 ├── theme/                # สีและ ThemeProvider (โหมดมืด/สว่าง)
 └── types/                # TypeScript types

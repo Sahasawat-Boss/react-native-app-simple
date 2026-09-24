@@ -35,6 +35,9 @@ function ThemedStack() {
         <Stack.Screen name="notes" options={{ title: 'บันทึกของฉัน' }} />
         <Stack.Screen name="lessons/index" options={{ title: 'บทเรียน' }} />
         <Stack.Screen name="settings" options={{ title: 'ตั้งค่า' }} />
+        <Stack.Screen name="chats/index" options={{ title: 'แชท' }} />
+        {/* ห้องแชททำหัวเอง (รูป + ชื่อ + สถานะออนไลน์) */}
+        <Stack.Screen name="chats/[id]" options={{ headerShown: false }} />
         {/* lessons/[id] ตั้งชื่อ header เองในไฟล์ของมัน */}
       </Stack>
     </>

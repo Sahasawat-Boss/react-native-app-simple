@@ -34,6 +34,13 @@ const MENU_ITEMS: MenuItem[] = [
     icon: 'document-text',
     color: '#5b5bd6',
   },
+  {
+    href: '/chats',
+    title: 'แชท',
+    description: 'คุยกับเพื่อนแบบแอปแชท',
+    icon: 'chatbubbles',
+    color: '#0a7cff',
+  },
 ];
 
 export default function HomeScreen() {
