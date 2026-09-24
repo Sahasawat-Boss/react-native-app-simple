@@ -1,18 +1,21 @@
 // หน้าบทเรียนแต่ละบท (route "/lessons/:id") — [id] ในชื่อไฟล์คือ dynamic segment
 // เหมือน app/lessons/[id]/page.tsx ใน Next.js แต่อ่านค่าด้วย useLocalSearchParams แทน props.params
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/Card';
 import { IconBadge } from '@/components/IconBadge';
-import { LESSONS } from '@/data/lessons';
+import { Lesson, LESSONS } from '@/data/lessons';
+import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useTheme } from '@/theme/ThemeProvider';
 import { withAlpha } from '@/theme/colors';
 
 export default function LessonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const lesson = LESSONS.find((l) => l.id === id);
+  const index = LESSONS.findIndex((l) => l.id === id);
+  const lesson = LESSONS[index];
   const { colors } = useTheme();
+  const { done, toggleDone } = useLessonProgress();
 
   // กรณีพิมพ์ URL ผิด หรือ id ไม่มีอยู่จริง
   if (!lesson) {
@@ -34,6 +37,9 @@ export default function LessonDetailScreen() {
 
       <View style={[styles.hero, { backgroundColor: withAlpha(lesson.color, 0.1) }]}>
         <IconBadge icon={lesson.icon} color={lesson.color} size={60} />
+        <Text style={[styles.heroEyebrow, { color: lesson.color }]}>
+          บทที่ {lesson.number}/{LESSONS.length} · {lesson.moduleTitle}
+        </Text>
         <Text style={[styles.heroTitle, { color: colors.text }]}>{lesson.title}</Text>
         <Text style={[styles.heroSummary, { color: colors.textSecondary }]}>{lesson.summary}</Text>
       </View>
@@ -59,7 +65,76 @@ export default function LessonDetailScreen() {
           ) : null}
         </Card>
       ))}
+
+      <DoneButton
+        isDone={done.has(lesson.id)}
+        color={lesson.color}
+        onPress={() => toggleDone(lesson.id)}
+      />
+
+      <View style={styles.pager}>
+        <PagerButton lesson={LESSONS[index - 1]} direction="prev" />
+        <PagerButton lesson={LESSONS[index + 1]} direction="next" />
+      </View>
     </ScrollView>
+  );
+}
+
+function DoneButton({ isDone, color, onPress }: { isDone: boolean; color: string; onPress: () => void }) {
+  const { colors } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.doneButton,
+        isDone
+          ? { backgroundColor: withAlpha(colors.success, 0.12), borderColor: colors.success }
+          : { backgroundColor: color, borderColor: color },
+        pressed && styles.pressed,
+      ]}
+    >
+      <Ionicons
+        name={isDone ? 'checkmark-circle' : 'checkmark-done'}
+        size={20}
+        color={isDone ? colors.success : '#fff'}
+      />
+      <Text style={[styles.doneButtonText, { color: isDone ? colors.success : '#fff' }]}>
+        {isDone ? 'เรียนจบบทนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนจบ'}
+      </Text>
+    </Pressable>
+  );
+}
+
+// ปุ่มไปบทก่อนหน้า/ถัดไป ใช้ router.replace เพื่อไม่ให้หน้าซ้อนกันยาว กด back แล้วกลับหน้ารายการเลย
+function PagerButton({ lesson, direction }: { lesson?: Lesson; direction: 'prev' | 'next' }) {
+  const { colors } = useTheme();
+  const isNext = direction === 'next';
+
+  // เว้นที่ว่างไว้ ปุ่มอีกฝั่งจะได้อยู่ตำแหน่งเดิม
+  if (!lesson) return <View style={styles.pagerButton} />;
+
+  return (
+    <Pressable
+      onPress={() => router.replace({ pathname: '/lessons/[id]', params: { id: lesson.id } })}
+      style={({ pressed }) => [
+        styles.pagerButton,
+        { backgroundColor: colors.card, borderColor: colors.border },
+        isNext && styles.pagerButtonNext,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={[styles.pagerLabel, { color: colors.textMuted }]}>
+        {isNext ? 'บทถัดไป' : 'บทก่อนหน้า'}
+      </Text>
+      <View style={[styles.pagerTitleRow, isNext && styles.pagerTitleRowNext]}>
+        {!isNext && <Ionicons name="arrow-back" size={14} color={colors.primary} />}
+        <Text style={[styles.pagerTitle, { color: colors.text }]} numberOfLines={1}>
+          {lesson.title}
+        </Text>
+        {isNext && <Ionicons name="arrow-forward" size={14} color={colors.primary} />}
+      </View>
+    </Pressable>
   );
 }
 
@@ -74,10 +149,15 @@ const styles = StyleSheet.create({
     padding: 22,
     marginBottom: 20,
   },
+  heroEyebrow: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 16,
+  },
   heroTitle: {
     fontSize: 24,
     fontWeight: '800',
-    marginTop: 16,
+    marginTop: 2,
     letterSpacing: -0.3,
   },
   heroSummary: {
@@ -136,6 +216,57 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
     fontSize: 13,
     lineHeight: 20,
+  },
+  doneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 14,
+    marginTop: 6,
+  },
+  doneButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  pager: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 14,
+  },
+  pagerButton: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'transparent',
+    padding: 14,
+  },
+  pagerButtonNext: {
+    alignItems: 'flex-end',
+  },
+  pagerLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  pagerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  pagerTitleRowNext: {
+    justifyContent: 'flex-end',
+  },
+  pagerTitle: {
+    flexShrink: 1,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  pressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.98 }],
   },
   notFound: {
     flex: 1,

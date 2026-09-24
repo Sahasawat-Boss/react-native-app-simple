@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { IconBadge } from '@/components/IconBadge';
 import { useCardStyle } from '@/components/Card';
+import { LESSONS } from '@/data/lessons';
 import { useTheme } from '@/theme/ThemeProvider';
 
 type MenuItem = {
@@ -20,18 +21,18 @@ type MenuItem = {
 // ตั้งค่าย้ายไปเป็นปุ่มเฟืองมุมขวาบนแทน
 const MENU_ITEMS: MenuItem[] = [
   {
+    href: '/lessons',
+    title: 'บทเรียน',
+    description: `หลักสูตร React Native ${LESSONS.length} บท`,
+    icon: 'school',
+    color: '#12a594',
+  },
+  {
     href: '/notes',
     title: 'บันทึก',
     description: 'จดโน้ตและรายการที่ต้องทำ',
     icon: 'document-text',
     color: '#5b5bd6',
-  },
-  {
-    href: '/lessons',
-    title: 'บทเรียน',
-    description: 'สรุปพื้นฐาน React Native',
-    icon: 'school',
-    color: '#12a594',
   },
 ];
 

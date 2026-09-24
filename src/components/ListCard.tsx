@@ -13,9 +13,10 @@ type Props = {
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
   eyebrow?: string; // ข้อความเล็กเหนือหัวข้อ เช่น "บทที่ 1"
+  done?: boolean; // true = แสดงเครื่องหมายถูกแทนลูกศร (เช่นบทเรียนที่เรียนจบแล้ว)
 };
 
-export function ListCard({ href, title, description, icon, color, eyebrow }: Props) {
+export function ListCard({ href, title, description, icon, color, eyebrow, done }: Props) {
   const { colors } = useTheme();
   const cardStyle = useCardStyle();
 
@@ -35,7 +36,11 @@ export function ListCard({ href, title, description, icon, color, eyebrow }: Pro
           {description}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      {done ? (
+        <Ionicons name="checkmark-circle" size={22} color={colors.success} />
+      ) : (
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      )}
     </Pressable>
   );
 }
