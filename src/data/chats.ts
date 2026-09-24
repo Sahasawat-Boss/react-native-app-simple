@@ -48,7 +48,7 @@ export const CONTACTS: Contact[] = [
     name: 'ทีม React Native',
     color: '#12a594',
     online: true,
-    replies: ['ประชุม 10 โมงนะทุกคน', 'PR merge แล้ว', 'ใครว่างช่วย review หน่อย 🙏'],
+    replies: ['ประชุม 10 โมงนะทุกคน', 'PR merge แล้ว', 'ใครว่างช่วย review หน่อย 🙏', 'lol'],
   },
   {
     id: 'mom',
