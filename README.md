@@ -35,16 +35,16 @@ npx expo lint      # ESLint
 ```
 src/
 ├── app/                  # หน้าจอทั้งหมด (Expo Router: 1 ไฟล์ = 1 route)
-│   ├── _layout.tsx       # Stack navigator + ThemeProvider ครอบทั้งแอป
-│   ├── index.tsx         # "/"          เมนูหลัก
-│   ├── lessons/
-│   │   ├── index.tsx     # "/lessons"   รายการบทเรียนตามโมดูล
-│   │   └── [id].tsx      # "/lessons/:id" เนื้อหาแต่ละบท
-│   ├── chats/
-│   │   ├── index.tsx     # "/chats"     รายชื่อแชท
-│   │   └── [id].tsx      # "/chats/:id" ห้องแชท
-│   ├── notes.tsx         # "/notes"     บันทึก
-│   └── settings.tsx      # "/settings"  ตั้งค่า
+│   ├── _layout.tsx       # Stack หลัก + ThemeProvider ครอบทั้งแอป
+│   ├── (tabs)/           # แถบเมนูด้านล่าง (วงเล็บ = ไม่ปรากฏใน URL)
+│   │   ├── _layout.tsx   # ตั้งค่าแท็บ ไอคอน และตัวเลขแชทที่ยังไม่อ่าน
+│   │   ├── index.tsx     # "/"          หน้าแรก
+│   │   ├── lessons.tsx   # "/lessons"   รายการบทเรียนตามโมดูล
+│   │   ├── chats.tsx     # "/chats"     รายชื่อแชท
+│   │   ├── notes.tsx     # "/notes"     บันทึก
+│   │   └── settings.tsx  # "/settings"  ตั้งค่า
+│   ├── lessons/[id].tsx  # "/lessons/:id" เนื้อหาแต่ละบท (เปิดทับแถบเมนู)
+│   └── chats/[id].tsx    # "/chats/:id"   ห้องแชท (เปิดทับแถบเมนู)
 ├── components/           # UI ที่ใช้ซ้ำ (Card, IconBadge, Avatar, NoteItem, ...)
 ├── data/                 # เนื้อหาหลักสูตร + ข้อมูลเพื่อนสมมติของแชท
 ├── hooks/                # useNotes, useLessonProgress, useChats
@@ -56,7 +56,7 @@ src/
 ### เพิ่มเนื้อหา
 
 - **เพิ่มบทเรียน:** ใส่ object ใหม่ใน `lessons` ของโมดูลใน [src/data/lessons.ts](src/data/lessons.ts) — `id` ห้ามซ้ำ เพราะใช้เป็น URL และ key ของความคืบหน้า
-- **เพิ่มเมนูหน้าแรก:** เพิ่ม item ใน `MENU_ITEMS` ของ [src/app/index.tsx](src/app/index.tsx) แล้วสร้างไฟล์ route ที่ตรงกับ `href` ใน `src/app/`
+- **เพิ่มแท็บ:** สร้างไฟล์ใน `src/app/(tabs)/` แล้วเพิ่ม `<Tabs.Screen>` ใน [src/app/(tabs)/_layout.tsx](<src/app/(tabs)/_layout.tsx>) (ถ้าอยากมีการ์ดทางลัดที่หน้าแรก เพิ่มใน `MENU_ITEMS` ของ [src/app/(tabs)/index.tsx](<src/app/(tabs)/index.tsx>) ด้วย)
 
 ## หมายเหตุ
 

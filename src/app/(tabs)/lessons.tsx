@@ -1,5 +1,5 @@
-// หน้ารายการบทเรียน (route "/lessons") — index.tsx ในโฟลเดอร์ = หน้าหลักของโฟลเดอร์นั้น
-// เหมือน app/lessons/page.tsx ใน Next.js
+// หน้ารายการบทเรียน (route "/lessons") — เป็นแท็บหนึ่งในแถบเมนูด้านล่าง
+// ส่วน "/lessons/:id" อยู่ที่ src/app/lessons/[id].tsx (นอก (tabs) จึงเปิดทับแถบเมนู)
 // ใช้ SectionList เพราะบทเรียนแบ่งเป็นกลุ่มตามโมดูล (FlatList ที่มีหัวข้อกลุ่ม)
 import { SectionList, StyleSheet, Text, View } from 'react-native';
 import { ListCard } from '@/components/ListCard';

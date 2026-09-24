@@ -1,7 +1,6 @@
 // หน้าบันทึก (route "/notes") — ประกอบ hook + components เข้าด้วยกัน
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotes } from '@/hooks/useNotes';
 import { NoteItem } from '@/components/NoteItem';
@@ -15,8 +14,6 @@ export default function NotesScreen() {
   const { notes, isLoading, addNote, toggleDone, deleteNote, updateNote } = useNotes();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  // header ด้านบนจัดการ safe area ให้แล้ว เหลือแค่ขอบล่าง (home indicator) สำหรับปุ่ม +
-  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 
   const openAddModal = () => {
@@ -51,7 +48,7 @@ export default function NotesScreen() {
         <FlatList
           data={notes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[styles.listContent, { paddingBottom: 110 + insets.bottom }]}
+          contentContainerStyle={styles.listContent}
           // ส่วนหัวของลิสต์ เลื่อนไปพร้อมรายการ (ต่างจาก header ของ Stack ที่ค้างอยู่ด้านบน)
           ListHeaderComponent={isLoading ? null : <ProgressCard notes={notes} />}
           renderItem={({ item }) => (
@@ -68,7 +65,7 @@ export default function NotesScreen() {
       <Pressable
         style={({ pressed }) => [
           styles.fab,
-          { bottom: 24 + insets.bottom, backgroundColor: colors.primary, shadowColor: colors.primary },
+          { backgroundColor: colors.primary, shadowColor: colors.primary },
           pressed && styles.fabPressed,
         ]}
         onPress={openAddModal}
@@ -127,6 +124,7 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 20,
     paddingTop: 8,
+    paddingBottom: 110, // เว้นที่ให้ปุ่ม + ไม่บังรายการสุดท้าย
   },
   progressCard: {
     padding: 18,
@@ -182,6 +180,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
+    bottom: 24,
     width: 60,
     height: 60,
     borderRadius: 30,

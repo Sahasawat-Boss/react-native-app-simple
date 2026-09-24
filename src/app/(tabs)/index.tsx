@@ -1,6 +1,6 @@
 // หน้าแรก (route "/") — เมนูหลักให้เลือกเข้าแต่ละฟีเจอร์
-// เพิ่มเมนูใหม่ได้โดยเพิ่ม object ใน MENU_ITEMS + สร้างไฟล์ route ที่ตรงกับ href ใน src/app/
-// หน้านี้ซ่อน header ของ Stack (ตั้งใน _layout.tsx) แล้วทำหัวหน้าเอง จึงต้องเว้นขอบบนตาม safe area เอง
+// การ์ดแต่ละใบเป็นทางลัดไปยังแท็บด้านล่าง — เพิ่มแท็บใหม่: สร้างไฟล์ใน src/app/(tabs)/ + ลงทะเบียนใน (tabs)/_layout.tsx
+// หน้านี้ซ่อน header (ตั้งใน (tabs)/_layout.tsx) แล้วทำหัวหน้าเอง จึงต้องเว้นขอบบนตาม safe area เอง
 import { Href, router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -64,22 +64,14 @@ export default function HomeScreen() {
             วันนี้อยากทำอะไรดี?
           </Text>
         </View>
-        {/* ใช้ router.push แทน <Link asChild> เพราะ Link asChild ทำ style แบบ function ของ Pressable หาย */}
-        <Pressable
-          onPress={() => router.push('/settings')}
-          style={({ pressed }) => [cardStyle, styles.settingsButton, pressed && styles.pressed]}
-          accessibilityRole="link"
-          accessibilityLabel="ตั้งค่า"
-        >
-          <Ionicons name="settings-outline" size={22} color={colors.text} />
-        </Pressable>
       </View>
 
       <View style={styles.grid}>
         {MENU_ITEMS.map((item) => (
           <Pressable
             key={String(item.href)}
-            onPress={() => router.push(item.href)}
+            // navigate = สลับไปแท็บนั้น (ไม่ซ้อนหน้าใหม่ทับ) — ใช้ Pressable + router แทน <Link asChild> เพราะ Link asChild ทำ style แบบ function หาย
+            onPress={() => router.navigate(item.href)}
             accessibilityRole="link"
             style={({ pressed }) => [cardStyle, styles.tile, pressed && styles.pressed]}
           >
@@ -126,13 +118,6 @@ const styles = StyleSheet.create({
   subGreeting: {
     fontSize: 16,
     marginTop: 4,
-  },
-  settingsButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   grid: {
     flexDirection: 'row',

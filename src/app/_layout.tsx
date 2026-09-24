@@ -30,12 +30,9 @@ function ThemedStack() {
           contentStyle: { backgroundColor: colors.background },
         }}
       >
-        {/* หน้าแรกทำหัวหน้าเอง (คำทักทาย + ปุ่มตั้งค่า) จึงซ่อน header */}
-        <Stack.Screen name="index" options={{ title: 'เมนู', headerShown: false }} />
-        <Stack.Screen name="notes" options={{ title: 'บันทึกของฉัน' }} />
-        <Stack.Screen name="lessons/index" options={{ title: 'บทเรียน' }} />
-        <Stack.Screen name="settings" options={{ title: 'ตั้งค่า' }} />
-        <Stack.Screen name="chats/index" options={{ title: 'แชท' }} />
+        {/* แท็บทั้งหมด (แถบเมนูด้านล่าง) — แต่ละแท็บมี header ของตัวเองใน (tabs)/_layout.tsx */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        {/* หน้ารายละเอียดด้านล่างนี้เปิดทับแถบเมนู (เต็มจอ มีปุ่มกลับ) */}
         {/* ห้องแชททำหัวเอง (รูป + ชื่อ + สถานะออนไลน์) */}
         <Stack.Screen name="chats/[id]" options={{ headerShown: false }} />
         {/* lessons/[id] ตั้งชื่อ header เองในไฟล์ของมัน */}
